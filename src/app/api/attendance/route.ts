@@ -1,0 +1,200 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+
+// GET - Get all attendance records
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const date = searchParams.get('date')
+    const employeeId = searchParams.get('employeeId')
+    const department = searchParams.get('department')
+    const status = searchParams.get('status')
+
+    const where: any = {}
+
+    if (date) {
+      where.date = date
+    }
+
+    if (employeeId) {
+      where.employeeId = employeeId
+    }
+
+    if (status) {
+      where.status = status
+    }
+
+    // If department is specified, we need to filter by employee's department
+    let attendances
+    if (department) {
+      attendances = await db.attendance.findMany({
+        where: {
+          ...where,
+          employee: {
+            department: department
+          }
+        },
+        include: {
+          employee: true
+        },
+        orderBy: { date: 'desc' }
+      })
+    } else {
+      attendances = await db.attendance.findMany({
+        where,
+        include: {
+          employee: true
+        },
+        orderBy: { date: 'desc' }
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      attendances
+    })
+
+  } catch (error) {
+    console.error('Get attendance error:', error)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan server' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST - Create or update attendance record
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { employeeId, qrCode, type } = body // type: 'check-in' or 'check-out'
+
+    if (!employeeId || !qrCode || !type) {
+      return NextResponse.json(
+        { error: 'Data tidak lengkap' },
+        { status: 400 }
+      )
+    }
+
+    if (type !== 'check-in' && type !== 'check-out') {
+      return NextResponse.json(
+        { error: 'Tipe absensi tidak valid' },
+        { status: 400 }
+      )
+    }
+
+    // Verify QR code is valid for today
+    const today = new Date().toISOString().split('T')[0]
+    const dailyQR = await db.dailyQR.findFirst({
+      where: {
+        date: today,
+        qrCode: qrCode,
+        isActive: true
+      }
+    })
+
+    if (!dailyQR) {
+      return NextResponse.json(
+        { error: 'QR code tidak valid atau kadaluarsa' },
+        { status: 400 }
+      )
+    }
+
+    // Verify employee exists
+    const employee = await db.employee.findUnique({
+      where: { id: employeeId }
+    })
+
+    if (!employee) {
+      return NextResponse.json(
+        { error: 'Karyawan tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    // Find existing attendance record for today
+    let attendance = await db.attendance.findUnique({
+      where: {
+        employeeId_date: {
+          employeeId,
+          date: today
+        }
+      }
+    })
+
+    const now = new Date()
+    const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
+
+    if (type === 'check-in') {
+      if (attendance && attendance.checkInTime) {
+        return NextResponse.json(
+          { error: 'Anda sudah melakukan check-in hari ini' },
+          { status: 400 }
+        )
+      }
+
+      // Determine status based on check-in time (09:00 is the cutoff)
+      const checkInTime = now
+      const lateThreshold = new Date(now)
+      lateThreshold.setHours(9, 0, 0, 0)
+      const isLate = checkInTime > lateThreshold
+
+      if (attendance) {
+        // Update existing record (was created as absent)
+        attendance = await db.attendance.update({
+          where: { id: attendance.id },
+          data: {
+            checkInTime: timeString,
+            status: isLate ? 'late' : 'present'
+          }
+        })
+      } else {
+        // Create new record
+        attendance = await db.attendance.create({
+          data: {
+            employeeId,
+            date: today,
+            checkInTime: timeString,
+            qrCode,
+            status: isLate ? 'late' : 'present'
+          }
+        })
+      }
+    } else {
+      // check-out
+      if (!attendance) {
+        return NextResponse.json(
+          { error: 'Anda belum melakukan check-in hari ini' },
+          { status: 400 }
+        )
+      }
+
+      if (attendance.checkOutTime) {
+        return NextResponse.json(
+          { error: 'Anda sudah melakukan check-out hari ini' },
+          { status: 400 }
+        )
+      }
+
+      attendance = await db.attendance.update({
+        where: { id: attendance.id },
+        data: {
+          checkOutTime: timeString
+        }
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      attendance,
+      message: `${type === 'check-in' ? 'Check-in' : 'Check-out'} berhasil pada ${timeString}`
+    })
+
+  } catch (error) {
+    console.error('Create attendance error:', error)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan server' },
+      { status: 500 }
+    )
+  }
+}
