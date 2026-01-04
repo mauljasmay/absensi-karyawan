@@ -1,6 +1,10 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Support for both SQLite and MySQL
+// Set DATABASE_PROVIDER environment variable to "sqlite" or "mysql"
+// Default is sqlite
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -58,3 +62,4 @@ model DailyQR {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
