@@ -1,8 +1,8 @@
 # Sistem Absensi Karyawan
 
-Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari, lengkap dengan notifikasi WhatsApp otomatis.
+Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari, lengkap dengan notifikasi WhatsApp otomatis dan halaman pengaturan admin.
 
-## ✨ Fitur Utama v2.1
+## ✨ Fitur Utama v2.2
 
 ### 1. **Core Attendance System**
 - ✅ QR code berubah setiap hari secara otomatis
@@ -12,7 +12,13 @@ Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari
 
 ### 2. **Admin Panel** 🔐
 - ✅ Dashboard dengan statistik real-time
-- ✅ Manajemen karyawan (CRUD lengkap)
+- ✅ **Halaman Pengaturan** untuk konfigurasi lengkap sistem
+  - Informasi perusahaan (nama, alamat, telepon, email)
+  - Kebijakan absensi (jam kerja, batas terlambat)
+  - Notifikasi WhatsApp (enable/disable, URL service)
+  - Konfigurasi QR code (auto-generate, expiry)
+  - Pengaturan sistem (notifications, database status)
+- ✅ Kelola karyawan (CRUD lengkap)
 - ✅ Laporan absensi dengan berbagai filter
 - ✅ Generate QR code harian untuk absensi
 - ✅ Monitoring karyawan yang hadir
@@ -21,7 +27,7 @@ Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari
 - ✅ Dashboard dengan profil pribadi
 - ✅ Scan QR code untuk check-in/check-out
 - ✅ Riwayat absensi pribadi
-- ✅ Notifikasi WhatsApp otomatis saat absensi
+- ✅ **Notifikasi WhatsApp otomatis** saat absensi
 
 ### 4. **WhatsApp Notifications** 📱💬
 - ✅ Notifikasi otomatis saat check-in berhasil
@@ -29,21 +35,32 @@ Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari
 - ✅ Format pesan yang informatif dengan emoji
 - ✅ Support untuk multi-device karyawan
 - ✅ Menggunakan Baileys library
+- ✅ Test koneksi WhatsApp dari admin panel
 
-### 5. **Dark Mode** 🌓
+### 5. **Admin Settings** ⚙️
+- ✅ Halaman pengaturan lengkap dengan tabs
+- ✅ Informasi perusahaan yang dapat dikustomisasi
+- ✅ Kebijakan absensi yang fleksibel
+- ✅ Toggle WhatsApp notifications
+- ✅ Konfigurasi QR code generation
+- ✅ Status sistem yang real-time
+- ✅ Reset ke default
+- ✅ Validasi input fields
+
+### 6. **Dark Mode** 🌓
 - ✅ Toggle dark/light mode di semua halaman
 - ✅ System preference detection
 - ✅ Persistent theme selection
 - ✅ Smooth transitions antar theme
 
-### 6. **Responsive Design** 📱💻
+### 7. **Responsive Design** 📱💻
 - ✅ Mobile-first design approach
 - ✅ Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
 - ✅ Touch-friendly untuk mobile
 - ✅ Desktop-optimized layout
 - ✅ Adaptive typography dan spacing
 
-### 7. **Multi-Database Support** 🗄️
+### 8. **Multi-Database Support** 🗄️
 - ✅ SQLite untuk development (default)
 - ✅ MySQL untuk production (optional)
 - ✅ Easy migration tools
@@ -53,7 +70,8 @@ Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari
 
 ### 🔐 Admin Panel
 - `/admin/login` - Login admin dengan dark mode
-- `/admin/dashboard` - Dashboard admin
+- `/admin/dashboard` - Dashboard admin dengan navigasi ke settings
+- `/admin/settings` - **Halaman pengaturan lengkap** ⭐ NEW
 - `/admin/employees` - Kelola data karyawan
 - `/admin/attendance` - Laporan absensi
 - `/admin/qr-code` - Generate QR code
@@ -61,23 +79,68 @@ Sistem absensi karyawan berbasis Next.js dengan QR code yang berubah setiap hari
 ### 👤 Karyawan Panel
 - `/employee/login` - Login karyawan dengan dark mode
 - `/employee/dashboard` - Dashboard karyawan
-- `/employee/scan` - Scan QR code
-- `/employee/history` - Riwayat absensi
+- `/employee/scan` - Scan QR code untuk absensi
+- `/employee/history` - Riwayat absensi pribadi
 
 ### 🏠 Halaman Utama
-- `/` - Landing page dengan pilihan login
-- Dark mode toggle di header
+- `/` - Landing page dengan pilihan login (Admin/Karyawan)
 
-Untuk detail lengkap, lihat [STRUKTUR-HALAMAN.md](./STRUKTUR-HALAMAN.md)
+Untuk detail lengkap struktur halaman, lihat [STRUKTUR-HALAMAN.md](./STRUKTUR-HALAMAN.md)
+
+## ⚙️ Halaman Pengaturan Admin
+
+### Fitur Settings
+
+#### 1. Tab Perusahaan
+- Nama perusahaan
+- Nomor telepon perusahaan
+- Alamat lengkap perusahaan
+- Email perusahaan
+
+#### 2. Tab Absensi
+- Jam masuk kerja (default: 08:00)
+- Jam pulang kerja (default: 17:00)
+- Batas terlambat (default: 09:00)
+- Izinkan check-in terlambat (toggle)
+- Wajib check-out (toggle)
+
+#### 3. Tab WhatsApp
+- Enable/disable notifikasi WhatsApp
+- URL service WhatsApp (default: http://localhost:3001)
+- Tombol test koneksi WhatsApp
+- Status badge aktif/non-aktif
+
+#### 4. Tab QR Code
+- Auto-generate QR code setiap hari (toggle)
+- Durasi QR code berlaku dalam menit (0 = hari ini saja)
+
+#### 5. Tab Sistem
+- Enable/disable notifikasi sistem
+- Status database (SQLite/MySQL)
+- Status WhatsApp service
+- Versi aplikasi
+
+### Validasi Settings
+- ✅ Validasi nomor telepon (format 08... atau 62...)
+- ✅ Validasi jam kerja (start < end)
+- ✅ Validasi batas terlambat (06:00 - 12:00)
+- ✅ Field wajib terisi (nama perusahaan)
+
+### Security
+- ✅ Authorization header check untuk API settings
+- ✅ Validasi input sebelum save
+- ✅ Error handling yang proper
+- ✅ Logout redirect ke login page
 
 ## 📱 WhatsApp Notifications
 
 ### Fitur
 - ✅ Notifikasi otomatis check-in berhasil
 - ✅ Notifikasi otomatis check-out berhasil
-- ✅ Format pesan yang informatif
-- ✅ Emoji untuk visual yang lebih baik
+- ✅ Format pesan yang informatif dengan emoji
 - ✅ Support untuk semua karyawan dengan nomor telepon
+- ✅ Integration dengan Baileys library
+- ✅ Test koneksi dari admin panel
 
 ### Format Pesan
 
@@ -101,55 +164,16 @@ Selamat bekerja! Semoga hari yang produktif. 🌟
 Terima kasih atas kerja hari ini! Sampai jumpa besok. 🙏
 ```
 
-### Cara Kerja
-
-1. **Karyawan Scan QR Code**
-   - Karyawan scan QR code di panel karyawan
-   - Sistem mencatat check-in/check-out di database
-   - Sistem mengambil nomor telepon karyawan
-   - Sistem memanggil WhatsApp service
-
-2. **WhatsApp Service Mengirim Notifikasi**
-   - WhatsApp service mengambil credentials dari environment
-   - Service mengirim pesan ke nomor karyawan
-   - Pesan otomatis terkirim ke WhatsApp karyawan
-   - Log tercatat di console untuk debugging
-
 ### Setup WhatsApp
 
-**Untuk panduan lengkap setup WhatsApp, lihat [DATABASE.md](./DATABASE.md)**
-
-### Environment Variables
-
-```bash
-# .env file
-
-# Enable WhatsApp notifications
-WHATSAPP_ENABLED="true"
-
-# WhatsApp Business API Configuration (Baileys)
-WHATSAPP_USERNAME="your_phone_number_id"
-WHATSAPP_PASSWORD="your_password"
-WHATSAPP_SERVER="wa.gw.msg"
-WHATSAPP_SERVER_PORT="443"
-
-# WhatsApp Service Port
-WHATSAPP_PORT=3001
-```
-
-### Dependencies yang Ditambahkan
-
-```json
-{
-  "@whiskeysockets/baileys": "^6.9.0"
-}
-```
+**Untuk panduan lengkap, lihat [DATABASE.md](./DATABASE.md)**
 
 ## 🗄️ Database Configuration
 
 Sistem mendukung dua database:
 
 ### SQLite (Default)
+- ✅ Mudah setup
 - ✅ File-based database
 - ✅ Cocok untuk development
 - **Setup**: `DATABASE_URL="file:./db/custom.db"`
@@ -200,7 +224,7 @@ curl -X POST http://localhost:3000/api/init
 # Terminal 1 - Next.js app (port 3000)
 npm run dev
 
-# Terminal 2 - WhatsApp service (port 3001)
+# Terminal 2 - WhatsApp service (port 3001) - Jika WhatsApp di-enable
 cd mini-services/whatsapp-service
 npm start
 ```
@@ -213,49 +237,31 @@ npm start
    ```
    Server akan berjalan di `http://localhost:3000`
 
-2. **Start WhatsApp Service**
-   ```bash
-   cd mini-services/whatsapp-service
-   npm start
-   ```
-   Service akan berjalan di `http://localhost:3001`
+2. **Login sebagai Admin**
+   - Buka `http://localhost:3000/admin/login`
+   - Username: `admin`
+   - Password: `admin123`
 
-3. **Enable WhatsApp Notifications**
-   ```bash
-   # Edit .env
-   WHATSAPP_ENABLED="true"
-   ```
+3. **Buka Pengaturan**
+   - Klik card "Pengaturan" di dashboard
+   - Atur semua pengaturan sesuai kebutuhan
+   - Klik "Simpan Pengaturan"
 
-4. **Restart Next.js Server**
-   ```bash
-   # Ctrl+C untuk stop server
-   npm run dev
-   ```
+4. **Test WhatsApp (Opsional)**
+   - Di tab WhatsApp, klik tombol test (icon bell)
+   - Pastikan status "Aktif"
+   - Cek logs WhatsApp service
 
-## Credential Login
-
-### Admin
-- **URL**: `/admin/login`
-- **Username**: `admin`
-- **Password**: `admin123`
-
-### Karyawan (Sample)
-- **URL**: `/employee/login`
-- **Email**: `employee@example.com`
-- **Password**: `employee123`
+5. **Enable WhatsApp Notifications**
+   - Set `WHATSAPP_ENABLED="true"` di .env
+   - Start WhatsApp service di terminal terpisah
+   - Test notifikasi dengan karyawan sample
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/auth/admin/login` - Login admin
-- `POST /api/auth/employee/login` - Login karyawan
-
-### Employees
-- `GET /api/employees` - Get all employees
-- `POST /api/employees` - Create new employee
-- `GET /api/employees/[id]` - Get employee by ID
-- `PUT /api/employees/[id]` - Update employee
-- `DELETE /api/employees/[id]` - Delete employee
+### Settings
+- `GET /api/admin/settings` - Get current settings (auth required)
+- `POST /api/admin/settings` - Save settings (auth required)
 
 ### Attendance (dengan WhatsApp notification)
 - `GET /api/attendance` - Get all attendance records
@@ -263,22 +269,7 @@ npm start
   - Body: `{ employeeId, qrCode, type: 'check-in'|'check-out' }`
   - Response: `{ success, attendance, message, whatsappSent }`
 
-### QR Code
-- `GET /api/qr-code` - Get QR code for today
-- `POST /api/qr-code` - Generate new QR code
-- `PUT /api/qr-code` - Validate QR code
-
-### Stats
-- `GET /api/stats?type=admin` - Get admin dashboard stats
-- `GET /api/stats?type=employee&employeeId=xxx` - Get employee dashboard stats
-
-### Initialization
-- `POST /api/init` - Initialize database with default data
-
-## WhatsApp Service API
-
-Service WhatsApp berjalan di port terpisah (3001) dengan API endpoints:
-
+### WhatsApp Service
 - `GET /health` - Health check service
 - `GET /status` - Status koneksi WhatsApp
 - `GET /qr` - Get QR code untuk scan
@@ -293,170 +284,111 @@ Service WhatsApp berjalan di port terpisah (3001) dengan API endpoints:
 absensi-karyawan/
 ├── src/
 │   ├── app/
-│   │   ├── admin/          # Admin Panel pages
-│   │   ├── employee/        # Karyawan Panel pages
-│   │   ├── api/             # API routes
-│   │   │   ├── attendance/  # Attendance API (dengan WhatsApp)
-│   │   │   ├── employees/   # Employee CRUD API
-│   │   │   ├── auth/        # Authentication API
-│   │   │   ├── qr-code/     # QR Code API
-│   │   │   ├── stats/       # Stats API
-│   │   │   └── init/        # Initialization API
-│   │   └── layout.tsx    # Root layout dengan ThemeProvider
+│   │   ├── admin/               # Admin Panel pages
+│   │   │   ├── dashboard/     # Dashboard (updated dengan nav ke settings)
+│   │   │   ├── settings/       # NEW - Pengaturan admin ⭐
+│   │   │   ├── employees/       # Kelola karyawan
+│   │   │   ├── attendance/      # Laporan absensi
+│   │   │   ├── qr-code/         # Generate QR code
+│   │   │   └── login/          # Login admin
+│   │   ├── employee/             # Karyawan Panel pages
+│   │   │   ├── dashboard/      # Dashboard karyawan
+│   │   │   ├── scan/           # Scan QR code
+│   │   │   ├── history/        # Riwayat absensi
+│   │   │   └── login/          # Login karyawan
+│   │   └── api/                # API routes
+│   │       ├── admin/
+│   │       │   └── settings/    # NEW - API settings ⭐
+│   │       ├── attendance/     # Attendance API (dengan WhatsApp)
+│   │       ├── employees/       # Employee CRUD API
+│   │       ├── auth/           # Authentication API
+│   │       ├── qr-code/        # QR Code API
+│   │       ├── stats/          # Stats API
+│   │       └── init/           # Initialization API
 │   ├── components/
-│   │   ├── ui/            # shadcn/ui components
-│   │   ├── theme-provider.tsx  # Theme provider
-│   │   └── theme-toggle.tsx    # Dark mode toggle
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── theme-provider.tsx     # Theme provider
+│   │   ├── theme-toggle.tsx        # Dark mode toggle
+│   │   └── ...               # Other components
 │   └── lib/
-│       └── db.ts         # Prisma client
+│       └── db.ts              # Prisma client
 ├── mini-services/
-│   └── whatsapp-service/    # WhatsApp notification service
-│       ├── index.ts       # Main service file
-│       └── package.json   # Dependencies untuk service
+│   └── whatsapp-service/      # WhatsApp notification service
+│       ├── index.ts            # Main service file
+│       └── package.json        # Service dependencies
 ├── prisma/
-│   └── schema.prisma       # Database schema (SQLite/MySQL)
+│   └── schema.prisma           # Database schema (SQLite/MySQL)
 ├── db/
-│   └── custom.db           # SQLite database file
-├── .env.example              # Environment variables template
-├── DATABASE.md               # Database dan WhatsApp documentation
-└── README-ABSENSI.md        # Dokumentasi lengkap
+│   ├── custom.db               # SQLite database file
+│   └── settings.json            # Admin settings file (NEW)
+├── .env.example               # Environment variables template
+├── DATABASE.md                 # Database dan WhatsApp documentation
+├── STRUKTUR-HALAMAN.md       # Struktur halaman detail
+├── SETTINGS-PAGE.md            # Settings page documentation (NEW)
+├── WHATSAPP-INTEGRATION.md      # WhatsApp integration guide
+├── README-ABSENSI.md           # Dokumentasi lengkap (UPDATED)
+└── ENHANCEMENTS.md            # Log perubahan v2.0
 ```
+
+## Credential Login
+
+### Admin
+- **URL**: `/admin/login`
+- **Username**: `admin`
+- **Password**: `admin123`
+
+### Karyawan (Sample)
+- **URL**: `/employee/login`
+- **Email**: `employee@example.com`
+- **Password**: `employee123`
 
 ## Fitur Tambahan
 
-### 1. **WhatsApp Service Features**
-- Auto-reconnect jika koneksi terputus
-- QR code display untuk admin
-- Bulk messaging support
-- Health check endpoint
-- Graceful shutdown
-- Error logging
+### 1. **Admin Settings** ⭐ NEW
+- Pengaturan perusahaan yang lengkap
+- Kebijakan absensi yang fleksibel
+- WhatsApp notifications management
+- QR code configuration
+- System status monitoring
+- Reset ke default
+- Validasi semua input fields
 
-### 2. **Attendance System Features**
-- Unique constraint untuk employee + date (hanya 1 record per hari)
-- Status otomatis berdasarkan waktu check-in
-- Late calculation (setelah 09:00 dianggap late)
-- Cascade delete jika karyawan dihapus
-- Support untuk notes (izin/sakit/cuti)
+### 2. **WhatsApp Integration** 📱💬
+- Notifikasi otomatis saat absensi
+- Format pesan yang informatif
+- Support untuk multi-device
+- Test koneksi dari admin panel
+- Error handling yang proper
+- Health check endpoint
 
 ### 3. **Security**
-- QR code berubah setiap hari
-- QR code lama otomatis tidak valid
-- Login terpisah untuk admin dan karyawan
-- Environment variables untuk credentials
-- Validasi QR code saat check-in/check-out
+- Authorization header check untuk settings API
+- Validasi input fields
+- Error handling yang proper
+- No sensitive data di client-side logs
 
 ### 4. **UX Improvements**
-- Dark mode dengan proper color schemes
-- Responsive design untuk semua ukuran screen
-- Smooth animations dan transitions
-- Loading states untuk semua operations
-- Error messages yang jelas
-
-## Troubleshooting
-
-### WhatsApp Notifications Tidak Jalan
-
-1. **Cek WhatsApp Service**
-   ```bash
-   cd mini-services/whatsapp-service
-   npm start
-   ```
-
-2. **Cek Health Endpoint**
-   ```bash
-   curl http://localhost:3001/health
-   ```
-
-3. **Cek Environment Variables**
-   ```bash
-   # Pastikan di .env
-   WHATSAPP_ENABLED="true"
-   ```
-
-4. **Cek Logs WhatsApp Service**
-   - Lihat console untuk error messages
-   - Pastikan credentials benar
-   - Pastikan koneksi internet stabil
-
-### Nomor Telepon Tidak Terdaftar
-
-**Masalah:** "Nomor telepon tidak terdaftar di WhatsApp"
-
-**Solusi:**
-- Pastikan nomor di format yang benar (dengan country code 62)
-- Nomor harus terdaftar di WhatsApp Business API
-- Cek bahwa karyawan sudah terdaftar di WhatsApp
-
-### WhatsApp Business API Issues
-
-**Masalah:** Rate limit atau API error
-
-**Solusi:**
-- Gunakan WhatsApp Business dengan rate limit yang lebih tinggi
-- Tambah delay antar pengiriman (sudah 100ms)
-- Monitor logs untuk errors
-- Gunakan multiple devices untuk load balancing
-
-## Production Deployment
-
-### Environment Variables untuk Production
-
-```bash
-# .env.production
-
-# Database (MySQL untuk production)
-DATABASE_URL="mysql://username:password@host:3306/absensi_karyawan"
-
-# WhatsApp
-WHATSAPP_ENABLED="true"
-WHATSAPP_USERNAME="production_phone_id"
-WHATSAPP_PASSWORD="production_password"
-WHATSAPP_SERVER="wa.gw.msg"
-
-# Node Environment
-NODE_ENV="production"
-```
-
-### Deployment Steps
-
-1. **Setup Database MySQL**
-   - Create database di production server
-   - Run migrations
-
-2. **Setup WhatsApp Business API**
-   - Create WhatsApp Business account
-   - Get API credentials
-   - Link nomor telepon ke API
-
-3. **Deploy Next.js App**
-   - Deploy ke Vercel, Netlify, atau hosting lain
-   - Set environment variables di deployment platform
-
-4. **Deploy WhatsApp Service**
-   - Deploy ke server terpisah (VPS, Render, dll)
-   - Set environment variables
-   - Start service
-
-5. **Configure Connections**
-   - Update WHATSAPP_BASE_URL di WhatsApp service
-   - Pastikan firewall mengizinkan koneksi antar services
+- Tabs navigation yang clear
+- Save/reset buttons dengan loading states
+- Status alerts dengan color coding
+- Important notes card untuk warnings
+- Responsive grid layouts
+- Test buttons untuk connectivity check
 
 ## Catatan Penting
 
 - 📱 **WhatsApp notifications** hanya berfungsi jika WHATSAPP_ENABLED="true"
-- 📱 Pastikan **WhatsApp service berjalan** di port 3001
+- 📱 Pastikan **WhatsApp service berjalan** jika notifications di-enable
 - 📱 **Nomor telepon karyawan** harus terdaftar di WhatsApp
 - 📱 Pastikan nomor telepon di format yang benar (dengan country code)
 - 📱 **WhatsApp Business API** harus sudah disetup dengan credentials yang benar
+- ⚙️ **Pengaturan disimpan** di server (file settings.json)
+- ⚙️ **Perubahan pengaturan** berlaku segera tanpa perlu restart server
+- ⚙️ **Reset ke default** akan menghapus semua customisasi
+- ⚙️ **Validasi settings** dilakukan sebelum save ke server
+- ⚙️ Untuk production, disarankan menggunakan **MySQL** untuk performa yang lebih baik
 - 📱 Gunakan **multiple WhatsApp numbers** jika karyawan banyak untuk menghindari rate limit
-- 📱 **Notifikasi WhatsApp** otomatis dikirim setiap kali karyawan check-in/check-out
-- 📱 **Dark mode preference** disimpan di localStorage browser karyawan
-- 📱 Untuk production, disarankan menggunakan **MySQL** untuk performa yang lebih baik
-- 📱 Pastikan **port tidak conflict** (Next.js: 3000, WhatsApp: 3001)
-- 📱 **QR code** berubah setiap hari untuk keamanan
-- 📱 Sistem menggunakan password plain text untuk demo (gunakan bcrypt di production)
-- 📱 Check-in maksimal pukul 09:00 untuk tidak dianggap terlambat
+- 📱 **Test koneksi WhatsApp** sebelum meng-enable untuk production
 
 ## Fitur yang Dapat Ditambahkan
 
@@ -468,11 +400,14 @@ NODE_ENV="production"
 - 📧 Email notifications selain WhatsApp
 - 🔐 Two-factor authentication
 - 👥 Role-based access control (admin, supervisor, manager)
-- 📱 Mobile app (React Native / Expo)
+- 📱 Telegram notifications sebagai alternatif WhatsApp
 - 📊 Analytics dashboard dengan charts
 - 🔄 Real-time updates dengan WebSockets
 - 📑 Calendar integration dengan Google Calendar
-- 💬 Telegram notifications sebagai alternatif WhatsApp
+- 💬 Chat notifications antar karyawan
+- 📱 Mobile app (React Native / Expo)
+- 🔄 Auto-logout setelah jam kerja
+- 📊 Performance tracking karyawan
 
 ## Teknologi yang Digunakan
 
@@ -488,9 +423,12 @@ NODE_ENV="production"
 
 ## Dokumentasi Lengkap
 
+- **[README-ABSENSI.md](./README-ABSENSI.md)** - Dokumentasi lengkap fitur dan usage
 - **[DATABASE.md](./DATABASE.md)** - Panduan lengkap database dan WhatsApp setup
 - **[STRUKTUR-HALAMAN.md](./STRUKTUR-HALAMAN.md)** - Struktur halaman detail
-- **[ENHANCEMENTS.md](./ENHANCEMENTS.md)** - Log perubahan terbaru
+- **[SETTINGS-PAGE.md](./SETTINGS-PAGE.md)** - Dokumentasi halaman pengaturan (NEW)
+- **[WATSAPP-INTEGRATION.md](./WATSAPP-INTEGRATION.md)** - WhatsApp integration guide
+- **[ENHANCEMENTS.md](./ENHANCEMENTS.md)** - Log perubahan v2.0 dan v2.2
 
 ## License
 
@@ -498,5 +436,5 @@ Project ini dibuat untuk keperluan internal dan dapat dikustomisasi sesuai kebut
 
 ---
 
-**Version**: 2.1.0
+**Version**: 2.2.0
 **Last Updated**: 2024
