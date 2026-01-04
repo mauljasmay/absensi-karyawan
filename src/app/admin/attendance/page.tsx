@@ -79,7 +79,8 @@ export default function AttendancePage() {
   const stats = getStats()
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
+    <AdminSidebar /
+      <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
       <header className="border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

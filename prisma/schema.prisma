@@ -29,10 +29,13 @@ model Employee {
   name           String
   email          String       @unique
   phone          String?
+  avatar         String?       // Foto profil karyawan
   department     String
   position       String
   password       String
-  avatar         String?
+  salaryDate     String?      // Tanggal gajian (format: YYYY-MM-DD)
+  bankAccount    String?      // Nomor rekening
+  bankName       String?      // Nama bank
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   attendances    Attendance[]

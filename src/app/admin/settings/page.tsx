@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Settings, Save, RefreshCw, Bell, Shield, Database, Moon, Sun, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Settings, Save, RefreshCw, Bell, Shield, Database, Moon, Sun, Clock, CheckCircle, XCircle, AlertTriangle, Download, Upload, Camera } from 'lucide-react'
 
 type Settings = {
   companyName: string
@@ -24,6 +24,7 @@ type Settings = {
   lateThreshold: string
   whatsappEnabled: boolean
   whatsappServiceUrl: string
+  autoUpdateWhatsApp: boolean
   autoGenerateQR: boolean
   qrExpiryMinutes: number
   allowLateCheckIn: boolean
@@ -41,6 +42,7 @@ const defaultSettings: Settings = {
   lateThreshold: '09:00',
   whatsappEnabled: false,
   whatsappServiceUrl: 'http://localhost:3001',
+  autoUpdateWhatsApp: true,
   autoGenerateQR: true,
   qrExpiryMinutes: 0,
   allowLateCheckIn: true,
@@ -52,6 +54,8 @@ export default function AdminSettingsPage() {
   const router = useRouter()
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingTest, setIsLoadingTest] = useState(false)
+  const [isLoadingUpdate, setIsLoadingUpdate] = useState(false)
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' })
 
   // Check if admin is logged in
@@ -81,6 +85,11 @@ export default function AdminSettingsPage() {
         setSaveStatus({ type: 'success', message: 'Pengaturan berhasil disimpan!' })
         // Update localStorage
         localStorage.setItem('settings', JSON.stringify(settings))
+
+        // If auto-update WhatsApp is enabled, trigger update
+        if (settings.autoUpdateWhatsApp && settings.whatsappEnabled) {
+          await handleUpdateWhatsApp()
+        }
       } else {
         setSaveStatus({ type: 'error', message: data.error || 'Gagal menyimpan pengaturan' })
       }
@@ -100,8 +109,14 @@ export default function AdminSettingsPage() {
   }
 
   const handleTestWhatsApp = async () => {
+    setIsLoadingTest(true)
+    setIsLoadingUpdate(false)
+
     try {
-      const response = await fetch(settings.whatsappServiceUrl + '/health')
+      const response = await fetch(settings.whatsappServiceUrl + '/health', {
+        method: 'GET',
+      })
+
       const data = await response.json()
 
       if (response.ok && data.status === 'active') {
@@ -111,6 +126,36 @@ export default function AdminSettingsPage() {
       }
     } catch (error) {
       alert('Gagal mengecek status WhatsApp service.')
+    } finally {
+      setIsLoadingTest(false)
+      setTimeout(() => setIsLoadingTest(false), 2000)
+    }
+  }
+
+  const handleUpdateWhatsApp = async () => {
+    setIsLoadingUpdate(true)
+    setIsLoadingTest(false)
+
+    try {
+      const response = await fetch(settings.whatsappServiceUrl + '/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        alert('WhatsApp service berhasil di-update!')
+      } else {
+        alert('Gagal meng-update WhatsApp service. ' + (data.error || 'Terjadi kesalahan'))
+      }
+    } catch (error) {
+      alert('Gagal meng-update WhatsApp service. Pastikan service berjalan.')
+    } finally {
+      setIsLoadingUpdate(false)
+      setTimeout(() => setIsLoadingUpdate(false), 2000)
     }
   }
 
@@ -120,7 +165,8 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
+    <AdminSidebar /
+      <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
       <header className="border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -136,9 +182,6 @@ export default function AdminSettingsPage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={handleTestWhatsApp} title="Test WhatsApp Service">
-              <Bell className="w-4 h-4" />
-            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout} title="Logout">
               Logout
             </Button>
@@ -152,8 +195,8 @@ export default function AdminSettingsPage() {
           {/* Save Status Alert */}
           {saveStatus.type && (
             <div className={`mb-6 p-4 rounded-lg border ${
-              saveStatus.type === 'success' 
-                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              saveStatus.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                 : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
             }`}>
               <div className="flex items-center gap-2">
@@ -163,8 +206,8 @@ export default function AdminSettingsPage() {
                   <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 )}
                 <p className={`font-medium ${
-                  saveStatus.type === 'success' 
-                    ? 'text-green-800 dark:text-green-200' 
+                  saveStatus.type === 'success'
+                    ? 'text-green-800 dark:text-green-200'
                     : 'text-red-800 dark:text-red-200'
                 }`}>
                   {saveStatus.message}
@@ -372,22 +415,70 @@ export default function AdminSettingsPage() {
                     </p>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="autoUpdateWhatsApp">Auto-Update WhatsApp Service</Label>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="autoUpdateWhatsApp"
+                        checked={settings.autoUpdateWhatsApp}
+                        onCheckedChange={(checked) => setSettings({ ...settings, autoUpdateWhatsApp: checked })}
+                      />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                        {settings.autoUpdateWhatsApp ? 'Auto-update service saat save' : 'Manual update'}
+                      </span>
+                    </div>
+                  </div>
+
                   {settings.whatsappEnabled && (
-                    <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                        <div className="text-sm text-blue-800 dark:text-blue-200">
-                          <p className="font-semibold mb-1">Penting!</p>
-                          <ul className="list-disc list-inside space-y-1 text-xs">
-                            <li>Pastikan WhatsApp service berjalan pada URL yang ditentukan</li>
-                            <li>Gunakan credentials WhatsApp Business API yang valid</li>
-                            <li>Nomor telepon karyawan harus terdaftar di WhatsApp</li>
-                            <li>Format nomor: 628123456789 atau 08123456789 (akan otomatis diubah ke 628...)</li>
-                          </ul>
+                    <>
+                      <Separator />
+
+                      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                          <div className="text-sm text-blue-800 dark:text-blue-200">
+                            <p className="font-semibold mb-1">Penting!</p>
+                            <ul className="list-disc list-inside space-y-1 text-xs">
+                              <li>Pastikan WhatsApp service berjalan pada URL yang ditentukan</li>
+                              <li>Gunakan credentials WhatsApp Business API yang valid</li>
+                              <li>Nomor telepon karyawan harus terdaftar di WhatsApp</li>
+                              <li>Format nomor: 628123456789 atau 08123456789 (akan otomatis diubah ke 628...)</li>
+                              <li>Gunakan Baileys v7 untuk performa dan stabilitas lebih baik</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </>
                   )}
+
+                  <div className="mt-4 grid md:grid-cols-2 gap-4">
+                    <Button onClick={handleTestWhatsApp} disabled={isLoadingTest} variant="outline" className="flex-1">
+                      {isLoadingTest ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                          Testing...
+                        </>
+                      ) : (
+                        <>
+                          <Bell className="w-4 h-4 mr-2" />
+                          Test Koneksi
+                        </>
+                      )}
+                    </Button>
+                    <Button onClick={handleUpdateWhatsApp} disabled={isLoadingUpdate} className="flex-1">
+                      {isLoadingUpdate ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Update Service
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -486,7 +577,7 @@ export default function AdminSettingsPage() {
                           </span>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-400">
-                          {settings.whatsappEnabled ? 'Aktif' : 'Non-Aktif'}
+                          {settings.whatsappEnabled ? 'Aktif (v7.0.0)' : 'Non-Aktif'}
                         </p>
                       </div>
                     </div>
@@ -502,7 +593,7 @@ export default function AdminSettingsPage() {
                       </p>
                     </div>
                     <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                      Versi 2.1
+                      Versi 2.3.0
                     </Badge>
                   </div>
                 </CardContent>
@@ -543,9 +634,11 @@ export default function AdminSettingsPage() {
               <p>• Perubahan pengaturan akan segera diterapkan ke sistem</p>
               <p>• Pastikan untuk menguji pengaturan baru dengan satu karyawan sebelum berlaku ke semua karyawan</p>
               <p>• Perubahan pengaturan WhatsApp membutuhkan service WhatsApp yang aktif</p>
+              <p>• WhatsApp service sekarang menggunakan Baileys v7.0.0 untuk performa dan stabilitas lebih baik</p>
               <p>• QR code yang sudah digunakan tidak akan terpengaruh oleh perubahan pengaturan QR</p>
-              <p>• Pengaturan ini disimpan di localStorage browser admin</p>
+              <p>• Pengaturan ini disimpan di localStorage browser admin dan file settings.json di server</p>
               <p>• Reset ke default akan menghapus semua customisasi yang telah dilakukan</p>
+              <p>• Auto-update WhatsApp akan me-restart service setiap kali settings di-save</p>
             </CardContent>
           </Card>
         </div>
