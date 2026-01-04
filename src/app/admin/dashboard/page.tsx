@@ -1,15 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { UserCheck, Users, Calendar, Clock, LogOut, Plus, TrendingUp } from 'lucide-react'
+import { UserCheck, Users, Calendar, Clock, LogOut, Plus, TrendingUp, Settings } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const router = useRouter()
   const [stats, setStats] = useState({
     totalEmployees: 0,
     todayPresent: 0,
@@ -148,7 +145,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="border-2">
             <CardHeader>
               <CardTitle>Kelola Karyawan</CardTitle>
@@ -189,6 +186,21 @@ export default function AdminDashboard() {
                 <Link href="/admin/qr-code">
                   <Plus className="w-4 h-4 mr-2" />
                   Generate QR Code
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle>Pengaturan</CardTitle>
+              <CardDescription>Konfigurasi sistem absensi</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" asChild>
+                <Link href="/admin/settings">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Pengaturan
                 </Link>
               </Button>
             </CardContent>
